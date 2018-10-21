@@ -1,0 +1,7 @@
+process data to extract well-formatted title and body text
+cut data so that body text that doesn't contain every title word is excluded
+come up with a basic idea for how our LSTM architecture could be formatted wrt layers, forward and backward pass, etc.
+pick a framework to do our LSTM in
+figure out how to make an LSTM in that framework
+make forward passing and backwards passing LSTMs
+figure out hyperparameters etc.
