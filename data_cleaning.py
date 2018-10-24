@@ -101,16 +101,13 @@ def create_csv(d_l):
 		d_l[1][i] = line
 
 	# needs simplifying
-	print(len(pop_indices))
-	print(len(d_l[0]))
+	print("Number of reply/forward or non-extractable emails: " + str(len(pop_indices)))
+	print("Number of emails after basic cleaning, such as getting rid of ones with empty subject/body: " + str(len(d_l[0])))
 
 	subject_dl = [d_l[0][m] for m in range(len(d_l[0])) if m not in pop_indices]
 	body_dl = [d_l[1][n] for n in range(len(d_l[1])) if n not in pop_indices]
-	files_dl = [d_l[2][n] for n in range(len(d_l[2])) if n not in pop_indices]
-	print(files_dl)
-	print(subject_dl)
-	print(body_dl)
-	print(len(files_dl))
+	files_dl = [d_l[2][k] for k in range(len(d_l[2])) if k not in pop_indices]
+	print("Number of actual emails used in the `final`-ish dataset: "  + str(len(files_dl)))
 	return pd.DataFrame({"Subject": subject_dl, "Body": body_dl, "File name": files_dl})
 
 def checkReForward(subject):
@@ -140,5 +137,3 @@ def main():
 	data_list = read_text()
 	csv = create_csv(data_list)
 	csv.to_csv("enron_cleaned.csv", sep = ',')
-
-main()
