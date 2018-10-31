@@ -53,11 +53,9 @@ def read_text():
 
 	return data
 
-# '=01&', '=01,'
-
 # the stopword list is quite cruicial in the process
 stoplist = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
-symbols = '!@#$%^&*()_+-=;:",./<>?\\'
+symbols = '\'$`[]!@#$%^&*()_+-=;:",./<>?\\' # add dollar sign and ` and ''
 escape = ['\n', '\t']
 
 def create_csv(d_l):
@@ -66,27 +64,21 @@ def create_csv(d_l):
 
 	for i in range(len(d_l[0])):
 		subject = d_l[0][i].lower()
+		line = d_l[1][i].lower()
 
 		if checkReForward(subject):
 			pop_indices.append(i)
 			continue
 
-		# subject = re.sub(escape, "", subject)
-
-		# subject = stopwords(subject)
-
-		line = d_l[1][i].lower()
-		# line = re.sub(escape, "", line)
-
 		for ch in symbols:
 			line = line.replace(ch, ' ')
 			subject = subject.replace(ch, ' ')
 
-		# for ch in escape:
-		# 	line = line.replace(ch, ' ')
-		# 	subject = subject.replace(ch, ' ')
-		# line = stopwords(line)
-
+		# remove numbers from string
+		# print(line)
+		line = ''.join(m for m in line if not m.isdigit())
+		# print(subject)
+		subject = ''.join(n for n in subject if not n.isdigit())
 		if not checkNonExtract(subject, line):
 			pop_indices.append(i)
 			continue
@@ -121,12 +113,8 @@ def stopwords(line):
 	return line
 
 def checkNonExtract(subject, txt):
-	# print("sub" + subject)
-	# print("txt" + txt)
 	words = nltk.word_tokenize(subject)
 	txt = nltk.word_tokenize(txt)
-	# print(words)
-	# print(txt)
 
 	for word in words:
 		if word not in txt:
@@ -137,3 +125,5 @@ def main():
 	data_list = read_text()
 	csv = create_csv(data_list)
 	csv.to_csv("enron_cleaned.csv", sep = ',')
+
+main()
