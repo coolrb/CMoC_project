@@ -1,3 +1,11 @@
+'''
+modeltrainer.py
+
+This file parses through the enron_cleaned.csv and inputs a training set of each subject and body (as tensors)
+into the LSTM network for email subject generation. It then runs the test set and compares the results 
+(a bag of highly probable words) with the actual subject for manual evaluation.
+'''
+
 import networkmaker
 import pandas as pd
 import nltk
@@ -9,15 +17,23 @@ from torch.autograd import Variable
 import random
 
 ## implementing stopwords cleaning
- # stoplist = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
+stopwords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
  # maybe also add 'http' and '.com'?
 alphabet = 'abcdefghijklmnopqrstuvwxyz '
 threshold = .5 # to determine if words should be included in the subject or not
 generator = networkmaker.SubjectGenerator()
 
 
-
+# remove stopwords
 def remove_stopwords(words):
+    '''
+    result = []
+    for word in words:
+        if word not in stopwords:
+            result.append(word)
+
+    return result
+    '''
     return words
 
 def word_to_tensor_list(word):
@@ -50,7 +66,6 @@ using the training set and predict the test set email bodies using the model
 '''
 def main():
     df = pd.read_csv("enron_cleaned.csv", index_col = 0)
-    print(df.head(5))
 
     num_rows = len(df.index)
 
@@ -73,6 +88,10 @@ def main():
         body_list = body.split()
         subject_list = subject.split()
 
+        # remove stopwords
+        body_list = remove_stopwords(body_list)
+        subject_list = remove_stopwords(subject_list)
+
         b_tensor_list = []
         s_tensor_list = []
 
@@ -86,18 +105,30 @@ def main():
         ## pass into the network
 
         # forward pass
-        generator.train_pattern(body = b_tensor_list, subject_line = s_tensor_list)
+        #generator.train_pattern(body = b_tensor_list, subject_line = s_tensor_list)
 
         # backward pass
-        generator.train_pattern(body = b_tensor_list.reverse(), subject_line = s_tensor_list.reverse())
+        #generator.train_pattern(body = b_tensor_list.reverse(), subject_line = s_tensor_list.reverse())
 
     # run and examine the results of the test set
-    for i in test:
-        subject_i = df.iloc[i]['Subject']
-        body_i = df.iloc[i]['Body']
+    for t in test:
+        subject_t = df.iloc[t]['Subject']
+        body_t = df.iloc[t]['Body']
+
+        body_list_t = body_t.split()
+        subject_list_t = subject_t.split()
+
+        # stopwords removal
+        body_list_t = remove_stopwords(body_list_t)
+        subject_list_t = remove_stopwords(subject_list_t)
+
+        test_tensor_list = []
+
+        for w_b_t in body_list_t:
+            test_tensor_list.append(word_to_tensor_list(w_b_t + " "))
 
         # get the output tensor for the particular subject after feeding it into the network
-        output_subject = 'something' # a scalar of probabilities
+        output_subject = generator.eval_pattern(test_tensor_list) # returns a scalar of probabilities
         predicted_subject = scalar_to_word(output_subject, subject_i.split())
 
         print("The body of the email is: \n")

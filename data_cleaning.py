@@ -1,16 +1,15 @@
 '''
 data_cleaning.py
 
-This file parses through the Enron email data csv file and returns a shortened csv file that
+This file parses through the Enron email data text directory and returns a shortened csv file that
 gets rid of all the reply/forward emails as well as emails with non-extractable words in the subjects.
+It gets rid of symbols, numbers and unnecessary spaces, and emails with empty subject or body.
 Thus, we can use the condensed email data for our next steps instead of running a huge chunk of data.
 '''
+
 import pandas as pd
 import nltk
 import os
-'''
-Parses through the email csv and returns a pandas dataframe and outputs a csv file
-'''
 
 def read_text():
 	data = [[],[],[]]
