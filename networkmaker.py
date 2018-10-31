@@ -19,8 +19,10 @@ class SubjectGenerator(nn.Module):
         self.outputLayer = nn.Linear(hidden2size, outputSize)
         self.outputActivation = nn.Sigmoid()
 
-    def forward(self, character, hidden, cell):
-        """a forward pass through the network, for predicting and training"""
+    def forward_one_letter(self, character, hidden, cell):
+        """a forward pass through the network that uses just one letter
+        We want the network to process data on a per-letter basis but update
+        its loss on a per-word basis so we're doing it this way"""
         newhid, newcell = self.LSTMLayer(character, (hidden,cell))
         newhid = self.relu1(newhid)
         newhid = self.fullyConnectedLayer(newhid)
@@ -29,6 +31,12 @@ class SubjectGenerator(nn.Module):
         newhid = self.outputActivation(newhid)
         return newhid, newcell
 
+    def forward(self, word, hidden, cell):
+        """a forward pass through the network, for predicting and training"""
+        for character in word:
+            hidden, cell = forward_one_letter(self, character, hidden, cell)
+        return hidden, cell
+
     def blank_cell_and_hidden(self):
         """returns empty cells and hidden for the first pass"""
         return torch.zeroes(1,self.hidden1size), torch.zeroes(1,self.hidden1size)
@@ -36,3 +44,10 @@ class SubjectGenerator(nn.Module):
     def save_model(self,destination):
         """saves the model so we don't have to retrain"""
         torch.save(self.state_dict(), destination)
+
+def load_model(source):
+    """loads model from state dict so we don't have to retrain"""
+    checkpoint = torch.load('models/convnet_mnist_pretrained_3layer_arch.pt')
+    model = Net()
+    model.load_state_dict(checkpoint)
+    return model
