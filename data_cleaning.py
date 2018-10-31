@@ -55,7 +55,7 @@ def read_text():
 
 # the stopword list is quite cruicial in the process
 stoplist = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
-symbols = '\'$`[]!@#$%^&*()_+-=;:",./<>?\\' # add dollar sign and ` and ''
+symbols = '$`[]!@#$%^&*()_+-=;:",./<>?\\|~\{\}' # add dollar sign and ` and ''
 escape = ['\n', '\t']
 
 def create_csv(d_l):
@@ -74,21 +74,30 @@ def create_csv(d_l):
 			line = line.replace(ch, ' ')
 			subject = subject.replace(ch, ' ')
 
+		# replace apostrophes with empty string
+		line = line.replace('\'', '')
+		subject = subject.replace('\'', '')
+
 		# remove numbers from string
 		# print(line)
 		line = ''.join(m for m in line if not m.isdigit())
 		# print(subject)
 		subject = ''.join(n for n in subject if not n.isdigit())
+        
+        # use this instead of strip() to get rid of all empty spaces (including \n and \t)
+		subject = ' '.join(subject.split())
+		line = ' '.join(line.split())
+        
+        # check empty subject or body again
+		if (not line) or (not subject):
+			pop_indices.append(i)
+			continue
+            
 		if not checkNonExtract(subject, line):
 			pop_indices.append(i)
 			continue
 
 		# update data list
-
-		# use this instead of strip() to get rid of all empty spaces (including \n and \t)
-		subject = ' '.join(subject.split())
-		line = ' '.join(line.split())
-
 		d_l[0][i] = subject
 		d_l[1][i] = line
 
