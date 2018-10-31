@@ -11,6 +11,11 @@ import random
 ## implementing stopwords cleaning
  # stoplist = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
  # maybe also add 'http' and '.com'?
+alphabet = 'abcdefghijklmnopqrstuvwxyz '
+threshold = .5 # to determine if words should be included in the subject or not
+generator = networkmaker.SubjectGenerator()
+
+
 
 def remove_stopwords(words):
     return words
@@ -26,16 +31,18 @@ def letter_to_index(letter):
         print(letter)
     return alphabet.find(letter)
 
-def scalar_to_word(scalar):
-    pass
+def scalar_to_word(scalar, subject_list):
+    result_list = []
+    for i in range(len(scalar)): # assuming scalar is a list
+        prob = scalar[i]
+        if prob > threshold:
+            result_list.append(subject_list[i])
 
+    return result_list
+
+# might not be needed
 def tensor_list_to_word(tensor_list):
     pass
-
-
-alphabet = 'abcdefghijklmnopqrstuvwxyz '
-
-generator = networkmaker.SubjectGenerator()
 
 '''
 Read in the data and create test and traing sets; train the SubjectGenerator Model
@@ -54,7 +61,7 @@ def main():
     test = random.sample(range(num_rows), num_test)
 
     # train data
-    # loop through each subject and body and create a list of tensors
+    # loop through each subject and body in training set and create a list of tensors
     for index, row in df.iterrows():
         if index in test:
             continue
@@ -90,8 +97,8 @@ def main():
         body_i = df.iloc[i]['Body']
 
         # get the output tensor for the particular subject after feeding it into the network
-        output_subject = 'something'
-        predicted_subject = scalar_to_word(output_subject)
+        output_subject = 'something' # a scalar of probabilities
+        predicted_subject = scalar_to_word(output_subject, subject_i.split())
 
         print("The body of the email is: \n")
         print(body_i)
