@@ -27,7 +27,7 @@ class SubjectGenerator(nn.Module):
         self.blank_cell_and_hidden()
 
         self.optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate) # stochastic gradient descent for optimization
-        self.criterion = nn.NLLLoss() # log-likelihood loss function
+        self.criterion = nn.BCELoss() # log-likelihood loss function
 
 
     def forward_one_letter(self, character, is_final=False):
