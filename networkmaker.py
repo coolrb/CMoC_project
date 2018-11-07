@@ -30,7 +30,7 @@ class SubjectGenerator(nn.Module):
         self.criterion = nn.NLLLoss() # log-likelihood loss function
 
 
-    def forward_one_letter(self, character):
+    def forward_one_letter(self, character, is_final=False):
         """a forward pass through the network that uses just one letter
         We want the network to process data on a per-letter basis but update
         its loss on a per-word basis so we're doing it this way"""
@@ -39,17 +39,21 @@ class SubjectGenerator(nn.Module):
         newcell = self.relu1(newcell)
         newhid = self.dropout1(newhid)
         newcell = self.dropout1(newcell)
-        newhid = self.fullyConnectedLayer(newhid)
-        newhid = self.relu2(newhid)
-        newhid = self.dropout2(newcell)
-        newhid = self.outputLayer(newhid)
-        newhid = self.outputActivation(newhid)
         self.hidden_carry, self.cell_carry = newhid, newcell
+        if is_final:
+            newhid = self.fullyConnectedLayer(newhid)
+            newhid = self.relu2(newhid)
+            newhid = self.dropout2(newhid)
+            newhid = self.outputLayer(newhid)
+            newhid = self.outputActivation(newhid)
+            return newhid
 
     def forward(self, word):
         """a forward pass through the network, for predicting and training"""
-        for character in word:
-            forward_one_letter(self, character)
+        for character in range(len(word)):
+            if character == len(word)-1:
+                return forward_one_letter(word[character], is_final=True)
+            forward_one_letter(word[character])
 
     def blank_cell_and_hidden(self):
         """resets empty cells and hidden for the first pass"""
@@ -73,8 +77,8 @@ class SubjectGenerator(nn.Module):
         loss = 0
         self.blank_cell_and_hidden()
         for i in range(len(body)):
-            self(body[i])
-            loss += self.criterion(self.hidden_carry, subject_key[i])
+            newpred = self(body[i])
+            loss += self.criterion(newpred, subject_key[i])
         loss.backward()
         self.optimizer.step()
         return loss.data.numpy() / len(subject_key)
