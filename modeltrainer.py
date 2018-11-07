@@ -23,8 +23,10 @@ alphabet = 'abcdefghijklmnopqrstuvwxyz '
 threshold = .5 # to determine if words should be included in the subject or not
 generator = networkmaker.SubjectGenerator()
 
-
-# remove stopwords
+'''
+Remove the stopwords:
+important parameter to control for during email subject generation
+'''
 def remove_stopwords(words):
     '''
     result = []
@@ -130,7 +132,8 @@ def main():
         # get the output tensor for the particular subject after feeding it into the network
         output_subject = generator.eval_pattern(test_tensor_list) # returns a scalar of probabilities
         predicted_subject = scalar_to_word(output_subject, subject_i.split())
-
+        
+        # results of test set can be used as results of the network
         print("The body of the email is: \n")
         print(body_i)
         print()
