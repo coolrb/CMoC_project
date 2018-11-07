@@ -41,7 +41,7 @@ class SubjectGenerator(nn.Module):
         newcell = self.dropout1(newcell)
         newhid = self.fullyConnectedLayer(newhid)
         newhid = self.relu2(newhid)
-        newhid = self.dropout2(newcell)
+        newhid = self.dropout2(newhid)
         newhid = self.outputLayer(newhid)
         newhid = self.outputActivation(newhid)
         self.hidden_carry, self.cell_carry = newhid, newcell
@@ -49,7 +49,7 @@ class SubjectGenerator(nn.Module):
     def forward(self, word):
         """a forward pass through the network, for predicting and training"""
         for character in word:
-            forward_one_letter(self, character)
+            self.forward_one_letter(character)
 
     def blank_cell_and_hidden(self):
         """resets empty cells and hidden for the first pass"""
