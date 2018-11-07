@@ -52,8 +52,8 @@ class SubjectGenerator(nn.Module):
         """a forward pass through the network, for predicting and training"""
         for character in range(len(word)):
             if character == len(word)-1:
-                return forward_one_letter(word[character], is_final=True)
-            forward_one_letter(word[character])
+                return self.forward_one_letter(word[character], is_final=True)
+            self.forward_one_letter(word[character])
 
     def blank_cell_and_hidden(self):
         """resets empty cells and hidden for the first pass"""
