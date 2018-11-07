@@ -16,6 +16,8 @@ from torch.autograd import Variable
 
 import random
 
+import matplotlib.pyplot as plt
+
 ## implementing stopwords cleaning
 stopwords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
  # maybe also add 'http' and '.com'?
@@ -61,7 +63,10 @@ def tensor_list_to_word(tensor_list):
     pass
 
 # plot the loss functions
-def plot_loss(fw_loss, bw_loss, nepochs):
+def plot_loss(fw_loss_train, bw_loss_train, fw_loss_test, bw_loss_test, nepochs):
+
+
+    # plt.show()
     pass
 
 '''
@@ -84,7 +89,7 @@ def main():
     
     # train data
     # loop through each subject and body in training set and create a list of tensors
-    for n in nepochs:
+    for n in range(nepochs):
         
         loss_fw_train = 0
         loss_bw_train = 0
@@ -117,18 +122,16 @@ def main():
             ## pass into the network
             if index not in test:
                 # forward pass
-                loss_fw_train += generator_fw.train_pattern(body = b_tensor_list, subject_line = s_tensor_list, "forward")
+                loss_fw_train += generator_fw.train_pattern(b_tensor_list, s_tensor_list)
 
                 # backward pass
-                loss_bw_train += generator_bw.train_pattern(body = b_tensor_list.reverse(), \
-                                                   subject_line = s_tensor_list.reverse(), "backward")
+                loss_bw_train += generator_bw.train_pattern(b_tensor_list.reverse(), s_tensor_list.reverse())
             else:
                 # forward pass
-                loss_fw_test += generator_fw.train_pattern(body = b_tensor_list, subject_line = s_tensor_list, "forward")
+                loss_fw_test += generator_fw.train_pattern(b_tensor_list, s_tensor_list)
 
                 # backward pass
-                loss_bw_test += generator_bw.train_pattern(body = b_tensor_list.reverse(), \
-                                                   subject_line = s_tensor_list.reverse(), "backward")
+                loss_bw_test += generator_bw.train_pattern(b_tensor_list.reverse(), s_tensor_list.reverse())
                 
         loss_fw_train_list.append(lost_fw_train)
         loss_bw_train_list.append(lost_bw_train)

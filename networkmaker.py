@@ -39,6 +39,7 @@ class SubjectGenerator(nn.Module):
         newcell = self.relu1(newcell)
         newhid = self.dropout1(newhid)
         newcell = self.dropout1(newcell)
+
         self.hidden_carry, self.cell_carry = newhid, newcell
         if is_final:
             newhid = self.fullyConnectedLayer(newhid)
