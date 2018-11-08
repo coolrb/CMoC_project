@@ -69,6 +69,15 @@ def plot_loss(fw_loss_train, bw_loss_train, fw_loss_test, bw_loss_test, nepochs)
     # plt.show()
     pass
 
+def makeSubjectTensor(word_list, subject_list):
+    word_tensor_list = []
+    for word in word_list:
+        if word in subject_list:
+            word_tensor_list.append(torch.LongTensor([[1]]))
+        else:
+            word_tensor_list.append(torch.LongTensor([[0]]))
+    return word_tensor_list
+
 '''
 Read in the data and create test and traing sets; train the SubjectGenerator Model
 using the training set and predict the test set email bodies using the model
@@ -116,8 +125,10 @@ def main():
             for w_b in body_list:
                 b_tensor_list.append(word_to_tensor_list(w_b + " "))
 
-            for w_s in subject_list:
-                s_tensor_list.append(word_to_tensor_list(w_s + " "))
+            s_tensor_list = makeSubjectTensor(body_list, subject_list)
+
+            #for w_s in subject_list:
+                #s_tensor_list.append(word_to_tensor_list(w_s + " "))
 
             ## pass into the network
             if index not in test:
