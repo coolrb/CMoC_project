@@ -102,8 +102,10 @@ def main():
 
     test = random.sample(range(num_rows), num_test)
     nepochs = 10
-    loss_fw_list = []
-    loss_bw_list = []
+    loss_fw_train_list = []
+    loss_bw_train_list = []
+    loss_fw_test_list = []
+    loss_bw_test_list = []
     
     # train data
     # loop through each subject and body in training set and create a list of tensors
@@ -131,7 +133,7 @@ def main():
 
             if len(body_list) == 0 or len(subject_list) == 0:
                 continue
-            
+
             # for every word, add empty space and create a list of tensors for it
             for w_b in body_list:
                 b_tensor_list.append(word_to_tensor_list(w_b + " "))
