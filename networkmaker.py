@@ -11,8 +11,8 @@ class SubjectGenerator(nn.Module):
         self.learning_rate = .001
 
         self.inputSize = 27 # all the letters and space
-        self.hidden1size = 10 # LSTM node count
-        self.hidden2size = 5 # fully connected node count
+        self.hidden1size = 4 # LSTM node count
+        self.hidden2size = 2 # fully connected node count
         self.outputSize = 1 # output
 
         self.LSTMLayer = nn.LSTMCell(self.inputSize, self.hidden1size)
@@ -80,8 +80,9 @@ class SubjectGenerator(nn.Module):
         for i in range(len(body)):
             newpred = self(body[i])
             loss += self.criterion(newpred, subject_key[i])
-            print("The loss at this step is", loss)
-            print(i)
+        print("Loss:",loss)
+        print("Words:",i)
+        print("Loss per word:",loss/i)
         loss.backward()
         self.optimizer.step()
         return loss.data.numpy() / len(subject_key)
