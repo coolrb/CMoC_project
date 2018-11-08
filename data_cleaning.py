@@ -96,6 +96,10 @@ def create_csv(d_l):
 			pop_indices.append(i)
 			continue
 
+		if checkLength(line) > 500:
+			pop_indices.append(i)
+			continue
+
 		# update data list
 		d_l[0][i] = subject
 		d_l[1][i] = line
@@ -112,7 +116,11 @@ def create_csv(d_l):
 
 def checkReForward(subject):
 	if ("re:" in subject) or ("fwd:" in subject) or ("fw:" in subject):
-		return True
+		return 
+
+def checkLength(body):
+	words = nltk.word_tokenize(body)
+	return len(words)
 
 # DO this in the model building file instead - stopwording here does not work
 def stopwords(line):

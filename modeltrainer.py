@@ -129,6 +129,9 @@ def main():
             b_tensor_list = []
             s_tensor_list = []
 
+            if len(body_list) == 0 or len(subject_list) == 0:
+                continue
+            
             # for every word, add empty space and create a list of tensors for it
             for w_b in body_list:
                 b_tensor_list.append(word_to_tensor_list(w_b + " "))
