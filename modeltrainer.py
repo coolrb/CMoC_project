@@ -157,10 +157,10 @@ def main():
                 # backward pass
                 loss_bw_test += generator_bw.train_pattern(b_tensor_list[::1], s_tensor_list[::1])
                 
-        loss_fw_train_list.append(lost_fw_train)
-        loss_bw_train_list.append(lost_bw_train)
-        loss_fw_test_list.append(lost_fw_test)
-        loss_bw_test_list.append(lost_bw_test)
+        loss_fw_train_list.append(loss_fw_train)
+        loss_bw_train_list.append(loss_bw_train)
+        loss_fw_test_list.append(loss_fw_test)
+        loss_bw_test_list.append(loss_bw_test)
 
         generator_fw.save_model("./saved/fw" + str(n))
         generator_bw.save_model("./saved/bw" + str(n))
