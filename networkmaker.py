@@ -86,7 +86,7 @@ class SubjectGenerator(nn.Module):
                 is_this_word = len(body[i]) == len(word_to_check)
                 if is_this_word:
                     for j,letter_to_check in enumerate(word_to_check):
-                        if not (letter_to_check.equals(body[i][j])):
+                        if not (letter_to_check.equal(body[i][j])):
                             is_this_word = False
                             break
                 if is_this_word:

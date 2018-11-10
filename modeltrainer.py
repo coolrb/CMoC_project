@@ -19,13 +19,26 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 
+def letter_to_index(letter):
+    if letter not in alphabet:
+        print(letter)
+    return alphabet.find(letter)
+
+def word_to_tensor_list(word):
+    tensor = torch.zeros(len(word), 1, len(alphabet))
+    for li, letter in enumerate(word):
+        tensor[li][0][letter_to_index(letter)] = 1
+    return tensor
+
 ## implementing stopwords cleaning
-stopwords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
+stopwords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up', 'a','b', 'c', 'd', 'e', 'f', 'g','h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u','v', 'w', 'x', 'w', 'z', 'y', 'wa', 'was', 'i', 'you', 'they', 'on', 'among', 'as', 'they', 'theirs', 'their', 'them', 'we', 'us', 'ours', 'our', 'she', 'he', 'her', 'him', 'me', 'my', 'mine', 'been', 'be', 'wont', 'would', 'wouldnt', 'must', 'have', 'has', 'had', 'will', 'about', 'out', 'which', 'what', 'why', 'when', 'where', 'how', 'are', 'is', 'am', 'were', 'may', 'out', 'enron', 'dont', 'do', 'did', 'didnt', 'if', 'need', 'this', 'that', 'these', 'those', 'it', 'about', 'with', 'so', 'at', 'by', 'bb', 're', 'forward', 'fyi', 'im', 'ho', 'thats', 'ok', 'subject', 'you', 'your', 'yours']
  # maybe also add 'http' and '.com'?
 alphabet = 'abcdefghijklmnopqrstuvwxyz '
 threshold = .5 # to determine if words should be included in the subject or not
-generator_fw = networkmaker.SubjectGenerator() # forward-input network
-generator_bw = networkmaker.SubjectGenerator() # backward-input network
+
+stopwords_tensor = [word_to_tensor_list(word + " ") for word in stopwords]
+generator_fw = networkmaker.SubjectGenerator(stopwords_tensor) # forward-input network
+generator_bw = networkmaker.SubjectGenerator(stopwords_tensor) # backward-input network
 
 '''
 Remove the stopwords:
@@ -38,18 +51,7 @@ def remove_stopwords(words):
             result.append(word)
 
     return result
-    
 
-def word_to_tensor_list(word):
-    tensor = torch.zeros(len(word), 1, len(alphabet))
-    for li, letter in enumerate(word):
-        tensor[li][0][letter_to_index(letter)] = 1
-    return tensor
-
-def letter_to_index(letter):
-    if letter not in alphabet:
-        print(letter)
-    return alphabet.find(letter)
 
 def scalar_to_word(scalar, subject_list):
     result_list = []
@@ -166,7 +168,10 @@ def main():
         generator_fw.save_model("./saved/fw" + str(n))
         generator_bw.save_model("./saved/bw" + str(n))
         print("Epoch", n, "is finished!")
-        
+    
+    print("loss list for training test for forward model is", ','.join(map(str, loss_fw_train_list)))
+    print("loss list for training test for backward model is", ','.join(map(str, loss_bw_train_list)))
+    
     plot_loss(loss_fw_train_list, loss_bw_train_list, nepochs)
 
     f = open("./test.txt", "w")
