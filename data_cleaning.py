@@ -65,13 +65,13 @@ def create_csv(d_l):
 		subject = d_l[0][i].lower()
 		line = d_l[1][i].lower()
 
-		if checkReForward(subject):
-			pop_indices.append(i)
-			continue
-
 		for ch in symbols:
 			line = line.replace(ch, ' ')
 			subject = subject.replace(ch, ' ')
+
+		if checkReForward(subject):
+			pop_indices.append(i)
+			continue
 
 		# replace apostrophes with empty string
 		line = line.replace('\'', '')
@@ -115,8 +115,9 @@ def create_csv(d_l):
 	return pd.DataFrame({"Subject": subject_dl, "Body": body_dl, "File name": files_dl})
 
 def checkReForward(subject):
-	if ("re:" in subject) or ("fwd:" in subject) or ("fw:" in subject):
-		return 
+	if ("re " in subject) or ("fwd " in subject) or ("fw " in subject):
+		return True
+	return False
 
 def checkLength(body):
 	words = nltk.word_tokenize(body)
