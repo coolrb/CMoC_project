@@ -4,10 +4,12 @@ import torch.nn as nn
 class SubjectGenerator(nn.Module):
     """a class for our model"""
 
-    def __init__(self):
+    def __init__(self, stopwords):
         """creates a new model with our architecture etc."""
         super(SubjectGenerator, self).__init__()
 
+
+        self.stopwords = stopwords
         self.learning_rate = .001
 
         self.inputSize = 27 # all the letters and space
@@ -79,7 +81,19 @@ class SubjectGenerator(nn.Module):
         self.blank_cell_and_hidden()
         for i in range(len(body)):
             newpred = self(body[i])
-            loss += self.criterion(newpred, subject_key[i])
+            in_stopwords = False
+            for word_to_check in self.stopwords:
+                is_this_word = len(body[i]) == len(word_to_check)
+                if is_this_word:
+                    for j,letter_to_check in enumerate(word_to_check):
+                        if not (letter_to_check.equals(body[i][j])):
+                            is_this_word = False
+                            break
+                if is_this_word:
+                    in_stopwords = True
+                    break
+            if not in_stopwords:
+                loss += self.criterion(newpred, subject_key[i])
         print("Loss:",loss)
         print("Words:",i)
         print("Loss per word:",loss/i)
