@@ -65,18 +65,19 @@ def tensor_list_to_word(tensor_list):
     pass
 
 # plot the loss functions
-def plot_loss(fw_loss_train, bw_loss_train, fw_loss_test, bw_loss_test, nepochs):
+def plot_loss(fw_loss_train, bw_loss_train, nepochs):
     flr = plt.plot(range(nepochs), fw_loss_train, color = 'blue')
-    wlr = plt.plot(range(nepochs), fw_loss_test, color = 'orange')
+    #wlr = plt.plot(range(nepochs), fw_loss_test, color = 'orange')
     flt = plt.plot(range(nepochs), bw_loss_train, color = 'blue', linestyle = '--')
-    wlt = plt.plot(range(nepochs), bw_loss_test, color = 'orange', linestyle = '--')
-
+    #wlt = plt.plot(range(nepochs), bw_loss_test, color = 'orange', linestyle = '--')
+    '''
     legend1 = plt.legend(handles = [mlines.Line2D([], [], color = 'blue', label = 'train'), mlines.Line2D([], [], color = 'orange', label = 'test')], bbox_to_anchor=(1, 1))
-    legend2 = plt.legend(handles = [mlines.Line2D([], [], label = 'forward', color = 'black'), mlines.Line2D([], [], linestyle = '--', label = 'backward', color = 'black')], bbox_to_anchor=(1, 0.8))
+    '''
+    legend2 = plt.legend(handles = [mlines.Line2D([], [], label = 'forward', color = 'blue'), mlines.Line2D([], [], linestyle = '--', label = 'backward', color = 'blue')])
     x = plt.xlabel("Epoch")
     y = plt.ylabel("Loss")
     title = plt.title("Loss in each epoch by forward and backward models and by test and training sets")
-    plt.savefig("loss_graph.png", bbox_inches = 'tight')
+    plt.savefig("loss_graph.png")
 
 def makeSubjectTensor(word_list, subject_list):
     word_tensor_list = []
@@ -150,42 +151,42 @@ def main():
 
                 # backward pass
                 loss_bw_train += generator_bw.train_pattern(b_tensor_list[::1], s_tensor_list[::1])
+            '''
             else:
                 # forward pass
                 loss_fw_test += generator_fw.train_pattern(b_tensor_list, s_tensor_list)
 
                 # backward pass
                 loss_bw_test += generator_bw.train_pattern(b_tensor_list[::1], s_tensor_list[::1])
+            '''
                 
         loss_fw_train_list.append(loss_fw_train)
         loss_bw_train_list.append(loss_bw_train)
-        loss_fw_test_list.append(loss_fw_test)
-        loss_bw_test_list.append(loss_bw_test)
 
         generator_fw.save_model("./saved/fw" + str(n))
         generator_bw.save_model("./saved/bw" + str(n))
         print("Epoch", n, "is finished!")
         
-    plot_loss(loss_fw_train_list, loss_bw_train_list, loss_fw_test_list, loss_bw_test_list, nepochs)
+    plot_loss(loss_fw_train_list, loss_bw_train_list, nepochs)
 
     f = open("./test.txt", "w")
     # run and examine the results of the test set
     for t in test:
         subject_t = df.iloc[t]['Subject']
         body_t = df.iloc[t]['Body']
-
+        
         body_list_t = body_t.split()
         subject_list_t = subject_t.split()
-
+        
         # stopwords removal
         body_list_t = remove_stopwords(body_list_t)
         subject_list_t = remove_stopwords(subject_list_t)
-
+        
         test_tensor_list = []
-
+        
         for w_b_t in body_list_t:
             test_tensor_list.append(word_to_tensor_list(w_b_t + " "))
-
+    
         # get the output tensor for the particular subject after feeding it into the network
         # forward
         output_subject_fw = generator_fw.eval_pattern(test_tensor_list) # returns a scalar of probabilities
@@ -194,39 +195,73 @@ def main():
         # backward
         output_subject_bw = generator_bw.eval_pattern(test_tensor_list) # returns a scalar of probabilities
         #predicted_subject_bw = scalar_to_word(output_subject_bw, body_list_t)
-
+        
         #TODO: write all of these to a text file
         # results of test set can be used as results of the network
+        body_t = ' '.join(body_list_t)
+        subject_t = ' '.join(subject_list_t)
+        
         print("The body of the email is: \n")
         print(body_t)
         print()
-
+        
         f.write("The body of the email is: \n")
         f.write(body_t)
         f.write("\n")
-
+        
         print("The actual subject of the email is: \n")
         print(subject_t)
         print()
-
+        
         f.write("The actual subject of the email is: \n")
         f.write(subject_t)
         f.write("\n")
-
-        print("The predicted subject of the email is (as a bag of words) for forward model: \n")
-        print(output_subject_fw)
+        
+        str_out_fw = []
+        str_out_bw = []
+        for i in range(len(output_subject_fw)):
+            str_out_fw.append(output_subject_fw[i].item())
+        
+        for i in range(len(output_subject_bw)):
+            str_out_bw.append(output_subject_bw[i].item())
+        
+        sorted_str_fw = [x for _,x in sorted(zip(str_out_fw, body_list_t))]
+        sorted_str_bw = [x for _,x in sorted(zip(str_out_bw, body_list_t))]
+        
+        
+        print("All words in body sorted by activations for forward model: \n")
+        print(','.join(sorted_str_fw))
         print()
-
-        f.write("The predicted subject of the email is (as a bag of words) for forward model: \n")
-        f.write(output_subject_fw)
+        
+        f.write("All words in body sorted by activations for forward model: \n")
+        f.write(','.join(sorted_str_fw))
         f.write("\n")
-
-        print("The predicted subject of the email is (as a bag of words) for backward model: \n")
-        print(output_subject_bw)
+        
+        print("All words in body sorted by activations for backward model: \n")
+        print(','.join(sorted_str_bw))
         print()
-
-        f.write("The predicted subject of the email is (as a bag of words) for backward model: \n")
-        f.write(output_subject_bw)
+        
+        f.write("All words in body sorted by activations for backward model: \n")
+        f.write(','.join(sorted_str_bw))
+        f.write("\n")
+        
+        
+        
+        
+        print("Activations for all words in forward model: \n")
+        print(','.join(map(str, str_out_fw)))
+        print()
+        
+        f.write("Activations for all words in forward model: \n")
+        f.write(','.join(map(str, str_out_fw)))
+        f.write("\n")
+        
+        print("Activations for all words in backward model: \n")
+        print(','.join(map(str, str_out_bw)))
+        print()
+        
+        f.write("Activations for all words in backward model: \n")
+        f.write(','.join(map(str, str_out_bw)))
         f.write("\n")
 
     f.close()
