@@ -135,7 +135,7 @@ class SubjectGenerator(nn.Module):
 
 def load_model(source):
     """loads model from state dict so we don't have to retrain"""
-    checkpoint = torch.load('models/convnet_mnist_pretrained_3layer_arch.pt')
-    model = Net()
+    checkpoint = torch.load(source)
+    model = SubjectGenerator()
     model.load_state_dict(checkpoint)
     return model
