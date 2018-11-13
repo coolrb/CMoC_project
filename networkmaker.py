@@ -9,7 +9,7 @@ import torch.nn as nn
 class SubjectGenerator(nn.Module):
     """a class for our model"""
 
-    def __init__(self, stopwords):
+      def __init__(self, stopwords):
         """creates a new model with our architecture etc."""
         super(SubjectGenerator, self).__init__()
 
@@ -136,6 +136,6 @@ class SubjectGenerator(nn.Module):
 def load_model(source):
     """loads model from state dict so we don't have to retrain"""
     checkpoint = torch.load(source)
-    model = SubjectGenerator()
+    model = SubjectGenerator([])
     model.load_state_dict(checkpoint)
     return model
