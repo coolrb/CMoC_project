@@ -140,7 +140,9 @@ def checkNonExtract(subject, txt):
 
 def main():
 	data_list = read_text()
-	csv = create_csv(data_list)
-	csv.to_csv("enron_cleaned.csv", sep = ',')
+	# to be cleaned for lemmatization and crossreference in R using coreNLP
+	pd.DataFrame({"Subject": data_list[0], "Body": data_list[1], "File name": data_list[2]}).to_csv("enron_R.csv", sep = ',')
+	#csv = create_csv(data_list)
+	#csv.to_csv("enron_cleaned.csv", sep = ',')
 
 main()

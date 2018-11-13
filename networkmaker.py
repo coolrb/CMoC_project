@@ -1,3 +1,8 @@
+hidden0size = 100
+hidden1size = 50
+hidden2size = 25
+hidden3size = 10
+
 import torch
 import torch.nn as nn
 
@@ -13,10 +18,12 @@ class SubjectGenerator(nn.Module):
         self.learning_rate = .001
 
         self.inputSize = 27 # all the letters and space
-        self.hidden0size = 200
-        self.hidden1size = 100 # LSTM node count
-        self.hidden2size = 50 # fully connected node count
-        self.hidden3size = 10
+
+        self.hidden0size = hidden0size
+        self.hidden1size = hidden1size # LSTM node count
+        self.hidden2size = hidden2size # fully connected node count
+        self.hidden3size = hidden3size
+
         self.outputSize = 1 # output
 
         self.LSTMLayer0 = nn.LSTMCell(self.inputSize, self.hidden0size)
@@ -130,7 +137,7 @@ class SubjectGenerator(nn.Module):
 
 def load_model(source):
     """loads model from state dict so we don't have to retrain"""
-    checkpoint = torch.load('models/convnet_mnist_pretrained_3layer_arch.pt')
-    model = Net()
+    checkpoint = torch.load(source)
+    model = SubjectGenerator()
     model.load_state_dict(checkpoint)
     return model

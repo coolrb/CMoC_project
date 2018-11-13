@@ -271,4 +271,119 @@ def main():
 
     f.close()
 
-main()
+def train_existing_model(fw, bw, file):
+    df = pd.read_csv("enron_cleaned.csv", index_col = 0)
+
+    num_rows = len(df.index)
+
+    # specify the number of training and testing sets
+    num_test = 20
+    num_train = num_rows - num_test
+
+    test = random.sample(range(num_rows), num_test)
+    f = open(file, "w")
+    # run and examine the results of the test set
+    for t in test:
+        subject_t = df.iloc[t]['Subject']
+        body_t = df.iloc[t]['Body']
+        
+        body_list_t = body_t.split()
+        subject_list_t = subject_t.split()
+        
+        # stopwords removal
+        body_list_t = remove_stopwords(body_list_t)
+        subject_list_t = remove_stopwords(subject_list_t)
+        
+        test_tensor_list = []
+        
+        for w_b_t in body_list_t:
+            test_tensor_list.append(word_to_tensor_list(w_b_t + " "))
+    
+        # get the output tensor for the particular subject after feeding it into the network
+        # forward
+        output_subject_fw = fw.eval_pattern(test_tensor_list) # returns a scalar of probabilities
+        #predicted_subject_fw = scalar_to_word(output_subject_fw, body_list_t)
+        
+        # backward
+        output_subject_bw = bw.eval_pattern(test_tensor_list) # returns a scalar of probabilities
+        #predicted_subject_bw = scalar_to_word(output_subject_bw, body_list_t)
+        
+        #TODO: write all of these to a text file
+        # results of test set can be used as results of the network
+        body_t = ' '.join(body_list_t)
+        subject_t = ' '.join(subject_list_t)
+        
+        print("The body of the email is: \n")
+        print(body_t)
+        print()
+        
+        f.write("The body of the email is: \n")
+        f.write(body_t)
+        f.write("\n")
+        
+        print("The actual subject of the email is: \n")
+        print(subject_t)
+        print()
+        
+        f.write("The actual subject of the email is: \n")
+        f.write(subject_t)
+        f.write("\n")
+        
+        str_out_fw = []
+        str_out_bw = []
+        for i in range(len(output_subject_fw)):
+            str_out_fw.append(output_subject_fw[i].item())
+        
+        for i in range(len(output_subject_bw)):
+            str_out_bw.append(output_subject_bw[i].item())
+        
+        sorted_str_fw = [x for _,x in sorted(zip(str_out_fw, body_list_t))]
+        sorted_str_bw = [x for _,x in sorted(zip(str_out_bw, body_list_t))]
+        
+        
+        print("All words in body sorted by activations for forward model: \n")
+        print(','.join(sorted_str_fw))
+        print()
+        
+        f.write("All words in body sorted by activations for forward model: \n")
+        f.write(','.join(sorted_str_fw))
+        f.write("\n")
+        
+        print("All words in body sorted by activations for backward model: \n")
+        print(','.join(sorted_str_bw))
+        print()
+        
+        f.write("All words in body sorted by activations for backward model: \n")
+        f.write(','.join(sorted_str_bw))
+        f.write("\n")
+        
+        print("Activations for all words in forward model: \n")
+        print(','.join(map(str, str_out_fw)))
+        print()
+        
+        f.write("Activations for all words in forward model: \n")
+        f.write(','.join(map(str, str_out_fw)))
+        f.write("\n")
+        
+        print("Activations for all words in backward model: \n")
+        print(','.join(map(str, str_out_bw)))
+        print()
+        
+        f.write("Activations for all words in backward model: \n")
+        f.write(','.join(map(str, str_out_bw)))
+        f.write("\n")
+
+    f.close()
+
+# load existing 
+args = sys.argv
+if "--load" in args:
+    index = args.index("--load")
+    d = args[index+1]
+    e = int(args[index+2])
+    file = args[index + 3]
+    fw = networkmaker.load_model(d + "/fw" + str(e-1))
+    bw = networkmaker.load_model(d + "/bw" + str(e-1))
+    train_existing_model(fw, bw, file)
+else:
+    main()
