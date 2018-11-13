@@ -13,9 +13,9 @@ class SubjectGenerator(nn.Module):
         self.learning_rate = .001
 
         self.inputSize = 27 # all the letters and space
-        self.hidden0size = 100
-        self.hidden1size = 50 # LSTM node count
-        self.hidden2size = 25 # fully connected node count
+        self.hidden0size = 200
+        self.hidden1size = 100 # LSTM node count
+        self.hidden2size = 50 # fully connected node count
         self.hidden3size = 10
         self.outputSize = 1 # output
 

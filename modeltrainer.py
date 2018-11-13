@@ -129,8 +129,8 @@ def main():
             subject_list = subject.split()
 
             # remove stopwords
-            body_list = remove_stopwords(body_list)
-            subject_list = remove_stopwords(subject_list)
+            #body_list = remove_stopwords(body_list)
+            #subject_list = remove_stopwords(subject_list)
             b_tensor_list = []
             s_tensor_list = []
 
@@ -184,8 +184,8 @@ def main():
         subject_list_t = subject_t.split()
         
         # stopwords removal
-        body_list_t = remove_stopwords(body_list_t)
-        subject_list_t = remove_stopwords(subject_list_t)
+        #body_list_t = remove_stopwords(body_list_t)
+        #subject_list_t = remove_stopwords(subject_list_t)
         
         test_tensor_list = []
         
