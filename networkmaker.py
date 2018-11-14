@@ -9,7 +9,7 @@ import torch.nn as nn
 class SubjectGenerator(nn.Module):
     """a class for our model"""
 
-      def __init__(self, stopwords):
+    def __init__(self, stopwords):
         """creates a new model with our architecture etc."""
         super(SubjectGenerator, self).__init__()
 
