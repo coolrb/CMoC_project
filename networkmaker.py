@@ -19,12 +19,12 @@ class SubjectGenerator(nn.Module):
 
         self.inputSize = 27 # all the letters and space
 
-        self.hidden0size = hidden0size
-        self.hidden1size = hidden1size # LSTM node count
-        self.hidden2size = hidden2size # fully connected node count
-        self.hidden3size = hidden3size
+        self.hidden0size = hidden0size # First LSTM node count
+        self.hidden1size = hidden1size # second LSTM node count
+        self.hidden2size = hidden2size # fully connected node count 1
+        self.hidden3size = hidden3size # fcnc 2
 
-        self.outputSize = 1 # output
+        self.outputSize = 1 # output size, should always be 1
 
         self.LSTMLayer0 = nn.LSTMCell(self.inputSize, self.hidden0size)
         self.relu = nn.ReLU()
@@ -38,7 +38,7 @@ class SubjectGenerator(nn.Module):
         self.outputLayer = nn.Linear(self.hidden3size, self.outputSize)
         self.outputActivation = nn.Sigmoid()
 
-        self.blank_cell_and_hidden()
+        self.blank_cell_and_hidden() #erase the memory before we begin
 
         self.optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate) # stochastic gradient descent for optimization
         self.criterion = nn.BCELoss() # log-likelihood loss function
@@ -63,7 +63,7 @@ class SubjectGenerator(nn.Module):
         newcell = self.dropout(newcell)
 
         self.hidden1_carry, self.cell1_carry = newhid, newcell
-        if is_final:
+        if is_final:  # the final letter in a word also gets the fully connected nodes
             newhid = self.fullyConnectedLayer0(newhid)
             newhid = self.relu(newhid)
             newhid = self.dropout(newhid)
@@ -138,6 +138,6 @@ class SubjectGenerator(nn.Module):
 def load_model(source):
     """loads model from state dict so we don't have to retrain"""
     checkpoint = torch.load(source)
-    model = SubjectGenerator([])
+    model = SubjectGenerator([]) #make sure the unit sizes are the same as the saved model
     model.load_state_dict(checkpoint)
     return model
