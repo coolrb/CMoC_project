@@ -1,9 +1,7 @@
 '''
 modeltrainer.py
 
-This file parses through the enron_cleaned.csv and inputs a training set of each subject and body (as tensors)
-into the LSTM network for email subject generation. It then runs the test set and compares the results 
-(a bag of highly probable words) with the actual subject for manual evaluation.
+This file parses through the enron_cleaned.csv and inputs a training set of each subject and body (as tensors) into the LSTM network for email subject generation. It then runs the test set and compares the results (a bag of highly probable words) with the actual subject for manual evaluation.
 '''
 
 import networkmaker
@@ -21,23 +19,28 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 
+# helper method to find the index of a letter in the alphabet
 def letter_to_index(letter):
     if letter not in alphabet:
         print(letter)
     return alphabet.find(letter)
 
+# returns a list of 1 x 27 tensors for each input word
 def word_to_tensor_list(word):
     tensor = torch.zeros(len(word), 1, len(alphabet))
     for li, letter in enumerate(word):
         tensor[li][0][letter_to_index(letter)] = 1
     return tensor
 
-## implementing stopwords cleaning
-stopwords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up', 'a','b', 'c', 'd', 'e', 'f', 'g','h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u','v', 'w', 'x', 'w', 'z', 'y', 'wa', 'was', 'i', 'you', 'they', 'on', 'among', 'as', 'they', 'theirs', 'their', 'them', 'we', 'us', 'ours', 'our', 'she', 'he', 'her', 'him', 'me', 'my', 'mine', 'been', 'be', 'wont', 'would', 'wouldnt', 'must', 'have', 'has', 'had', 'will', 'about', 'out', 'which', 'what', 'why', 'when', 'where', 'how', 'are', 'is', 'am', 'were', 'may', 'out', 'enron', 'dont', 'do', 'did', 'didnt', 'if', 'need', 'this', 'that', 'these', 'those', 'it', 'about', 'with', 'so', 'at', 'by', 'bb', 're', 'forward', 'fyi', 'im', 'ho', 'thats', 'ok', 'subject', 'you', 'your', 'yours']
- # maybe also add 'http' and '.com'?
-alphabet = 'abcdefghijklmnopqrstuvwxyz '
-threshold = .5 # to determine if words should be included in the subject or not
+# old stopwords list
+# stopwords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up']
 
+## used to filter out stopwords while training models so their losses will not be included
+stopwords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'from', 'not', 'but', 'up', 'a','b', 'c', 'd', 'e', 'f', 'g','h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u','v', 'w', 'x', 'w', 'z', 'y', 'wa', 'was', 'i', 'you', 'they', 'on', 'among', 'as', 'they', 'theirs', 'their', 'them', 'we', 'us', 'ours', 'our', 'she', 'he', 'her', 'him', 'me', 'my', 'mine', 'been', 'be', 'wont', 'would', 'wouldnt', 'must', 'have', 'has', 'had', 'will', 'about', 'out', 'which', 'what', 'why', 'when', 'where', 'how', 'are', 'is', 'am', 'were', 'may', 'out', 'enron', 'dont', 'do', 'did', 'didnt', 'if', 'need', 'this', 'that', 'these', 'those', 'it', 'about', 'with', 'so', 'at', 'by', 'bb', 're', 'forward', 'fyi', 'im', 'ho', 'thats', 'ok', 'subject', 'you', 'your', 'yours']
+
+alphabet = 'abcdefghijklmnopqrstuvwxyz '
+
+# stopword tensor to input into networkmaker.py
 stopwords_tensor = [word_to_tensor_list(word + " ") for word in stopwords]
 generator_fw = networkmaker.SubjectGenerator(stopwords_tensor) # forward-input network
 generator_bw = networkmaker.SubjectGenerator(stopwords_tensor) # backward-input network
@@ -55,20 +58,6 @@ def remove_stopwords(words):
             result.append(word)
 
     return result
-
-
-def scalar_to_word(scalar, subject_list):
-    result_list = []
-    for i in range(len(scalar)): # assuming scalar is a list
-        prob = scalar[i]
-        if prob > threshold:
-            result_list.append(subject_list[i])
-
-    return result_list
-
-# might not be needed
-def tensor_list_to_word(tensor_list):
-    pass
 
 # plot the loss functions
 def plot_loss(fw_loss_train, bw_loss_train, nepochs):
@@ -118,7 +107,11 @@ def main():
         loss_bw_test = 0
         
         for index, row in df.iterrows():
-
+            
+            # only process training set
+            if index in test:
+                continue
+            
             subject = row['Subject']
             body = row['Body']
 
@@ -143,17 +136,17 @@ def main():
 
 
             ## pass into the network
-            if index not in test:
-                # forward pass
-                loss_fw_train += generator_fw.train_pattern(b_tensor_list, s_tensor_list)
+            # forward pass
+            loss_fw_train += generator_fw.train_pattern(b_tensor_list, s_tensor_list)
 
-                # backward pass
-                loss_bw_train += generator_bw.train_pattern(b_tensor_list[::1], s_tensor_list[::1])
+            # backward pass
+            loss_bw_train += generator_bw.train_pattern(b_tensor_list[::1], s_tensor_list[::1])
     
                 
         loss_fw_train_list.append(loss_fw_train)
         loss_bw_train_list.append(loss_bw_train)
-
+        
+        # must create saved dir in the current directory
         generator_fw.save_model("./saved/fw" + str(n))
         generator_bw.save_model("./saved/bw" + str(n))
         print("Epoch", n, "is finished!")
@@ -162,7 +155,8 @@ def main():
     print("loss list for training test for backward model is", ','.join(map(str, loss_bw_train_list)))
     
     plot_loss(loss_fw_train_list, loss_bw_train_list, nepochs)
-
+    
+    # save everything to test.txt in the directory
     train_existing_model(df, generator_fw, generator_bw, "./test.txt")
 
 
@@ -215,14 +209,37 @@ def train_existing_model(df, fw, bw, file):
         
         str_out_fw = []
         str_out_bw = []
+        # convert output tensor probabilities to Python list format
         for i in range(len(output_subject_fw)):
             str_out_fw.append(output_subject_fw[i].item())
         
         for i in range(len(output_subject_bw)):
             str_out_bw.append(output_subject_bw[i].item())
         
-        sorted_str_fw = [x for _,x in sorted(zip(str_out_fw, body_list_t))]
-        sorted_str_bw = [x for _,x in sorted(zip(str_out_bw, body_list_t))]
+        # update probability list by taking the maximum of all occurences of every unique word
+        unique_body_list = []
+        max_out_fw = []
+        max_out_bw = []
+        max_out = []
+        visited = []
+
+        for word in body_list_t:
+            # skip the word if it is not unique and has been visited
+            if word in visited:
+                continue
+            indices = [i for i, x in enumerate(body_list_t) if x == word]
+            unique_body_list.append(word)
+            max_fw = max([str_out_fw[i] for i in range(len(body_list_t)) if i in indices])
+            max_bw = max([str_out_bw[i] for i in range(len(body_list_t)) if i in indices])
+            max_out_fw.append(max_fw)
+            max_out_bw.append(max_bw)
+            max_out.append(max(max_bw, max_fw))
+            visited.append(word)
+
+        # return list of strings for each model sorted by the corresponding probabilities
+        sorted_str_fw = [x for _,x in sorted(zip(max_out_fw, unique_body_list))]
+        sorted_str_bw = [x for _,x in sorted(zip(max_out_bw, unique_body_list))]
+        sorted_str_max = [x for _,x in sorted(zip(max_out, unique_body_list))]
         
         
         print("All words in body sorted by activations for forward model: \n")
@@ -240,21 +257,37 @@ def train_existing_model(df, fw, bw, file):
         f.write("All words in body sorted by activations for backward model: \n")
         f.write(','.join(sorted_str_bw))
         f.write("\n")
+
+        print("All words in body sorted by activations for maximum model: \n")
+        print(','.join(sorted_str_max))
+        print()
+        
+        f.write("All words in body sorted by activations for maximum model: \n")
+        f.write(','.join(sorted_str_max))
+        f.write("\n")
         
         print("Activations for all words in forward model: \n")
-        print(','.join(map(str, str_out_fw)))
+        print(','.join(map(str, max_out_fw)))
         print()
         
         f.write("Activations for all words in forward model: \n")
-        f.write(','.join(map(str, str_out_fw)))
+        f.write(','.join(map(str, max_out_fw)))
         f.write("\n")
         
         print("Activations for all words in backward model: \n")
-        print(','.join(map(str, str_out_bw)))
+        print(','.join(map(str, max_out_bw)))
         print()
         
         f.write("Activations for all words in backward model: \n")
-        f.write(','.join(map(str, str_out_bw)))
+        f.write(','.join(map(str, max_out_bw)))
+        f.write("\n")
+            
+        print("Activations for all words in maximum model: \n")
+        print(','.join(map(str, max_out)))
+        print()
+    
+        f.write("Activations for all words in maximum model: \n")
+        f.write(','.join(map(str, max_out)))
         f.write("\n")
 
     f.close()
