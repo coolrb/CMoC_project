@@ -1,7 +1,9 @@
 '''
 modeltrainer.py
 
-This file parses through the enron_cleaned.csv and inputs a training set of each subject and body (as tensors) into the LSTM network for email subject generation. It then runs the test set and compares the results (a bag of highly probable words) with the actual subject for manual evaluation.
+This file parses through the enron_cleaned.csv and inputs a training set of each subject and body (as tensors) into the LSTM 
+network for email subject generation. It then runs the test set and compares the results (a bag of highly probable words) 
+with the actual subject for manual evaluation.
 '''
 
 import networkmaker
@@ -62,18 +64,17 @@ def remove_stopwords(words):
 # plot the loss functions
 def plot_loss(fw_loss_train, bw_loss_train, nepochs):
     flr = plt.plot(range(nepochs), fw_loss_train, color = 'blue')
-    #wlr = plt.plot(range(nepochs), fw_loss_test, color = 'orange')
     flt = plt.plot(range(nepochs), bw_loss_train, color = 'blue', linestyle = '--')
-    #wlt = plt.plot(range(nepochs), bw_loss_test, color = 'orange', linestyle = '--')
-    '''
-    legend1 = plt.legend(handles = [mlines.Line2D([], [], color = 'blue', label = 'train'), mlines.Line2D([], [], color = 'orange', label = 'test')], bbox_to_anchor=(1, 1))
-    '''
-    legend2 = plt.legend(handles = [mlines.Line2D([], [], label = 'forward', color = 'blue'), mlines.Line2D([], [], linestyle = '--', label = 'backward', color = 'blue')])
+
+    legend = plt.legend(handles = [mlines.Line2D([], [], label = 'forward', color = 'blue'), mlines.Line2D([], [], linestyle = '--', label = 'backward', color = 'blue')])
     x = plt.xlabel("Epoch")
     y = plt.ylabel("Loss")
     title = plt.title("Loss in each epoch by forward and backward models and by test and training sets")
     plt.savefig("loss_graph.png")
 
+'''
+Converts the body list into a list of nested tensors of size 1 which stores 1 if that word is in the subject and 0 otherwise
+'''
 def makeSubjectTensor(word_list, subject_list):
     word_tensor_list = []
     for word in word_list:
@@ -122,6 +123,7 @@ def main():
             # remove stopwords (approach 1)
             #body_list = remove_stopwords(body_list)
             #subject_list = remove_stopwords(subject_list)
+            
             b_tensor_list = []
             s_tensor_list = []
 
