@@ -8,4 +8,4 @@ To run our model: process the data by running `data_cleaning.py` with python3, a
 
 You should have a subdirectory "saved" in the project directory, which will store the models after they're trained.
 
-The subdirectory "old_version" contains our originally model, as we talk about in the paper.
+The subdirectory "old_version" contains our originally model, as we talk about in the paper. You can run it the same way you can run our main code.
