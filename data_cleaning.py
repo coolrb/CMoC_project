@@ -17,13 +17,12 @@ def read_text():
 	data = [[],[],[]]
 
 	for file in os.listdir('enron_all_emails/'):
-		f = open('enron_all_emails/' + file)
+		f = open('enron_all_emails/' + file, 'r', encoding="ascii", errors="surrogateescape")
 		foundBody = False
 
 		# check if email contains forward info in email body and gets rid of that
 		foundBodyFwd = False
 		foundBodySub = False
-
 		# make sure that if body paragraph starts with forward/reply email but subject
 		# does not indicate so, then that chunk of the paragraph is not ignored
 		body = ""
